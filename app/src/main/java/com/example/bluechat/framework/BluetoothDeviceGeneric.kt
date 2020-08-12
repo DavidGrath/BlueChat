@@ -17,7 +17,7 @@ class BluetoothDeviceGeneric(var device: BluetoothDevice, socket: BluetoothSocke
     fun setSocketValue(value : BluetoothSocket) {
         this.socket = value
         state = SocketConnectionState.Connected()
-        socketCallback?.onSocketStateChanged(device)
+        socketCallback?.onSocketStateChanged(state)
         startListeningForMessages(handler)
     }
     var handler = handler
@@ -46,7 +46,7 @@ class BluetoothDeviceGeneric(var device: BluetoothDevice, socket: BluetoothSocke
 
     fun socketFailedReadWrite() {
         state = SocketConnectionState.Closed()
-        socketCallback?.onSocketStateChanged(socket!!.remoteDevice)
+        socketCallback?.onSocketStateChanged(state)
         readThread = null
         socket = null
     }

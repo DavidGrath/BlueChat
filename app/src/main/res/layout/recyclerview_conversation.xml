@@ -30,13 +30,13 @@
             app:layout_constraintBottom_toBottomOf="@+id/conversation_name" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="16dp"/>
     <TextView
-            android:text="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:text="999"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:id="@+id/conversation_unread_count"
             android:background="@drawable/circle"
             app:layout_constraintTop_toTopOf="@+id/conversation_latest_message"
             app:layout_constraintBottom_toBottomOf="@+id/conversation_latest_message"
-            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="16dp" android:padding="4dp"
-            android:textColor="#FFFFFF"/>
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="16dp"
+            android:textColor="#FFFFFF" android:gravity="center" android:textSize="12sp" android:singleLine="true"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

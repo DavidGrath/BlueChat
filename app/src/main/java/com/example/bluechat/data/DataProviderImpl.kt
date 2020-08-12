@@ -53,12 +53,10 @@ object DataProviderImpl : DataProvider {
     override fun getConversations(): LiveData<ArrayList<Conversation>> {
         return Transformations.map(chatsLiveData) { chats->
             val chatsTemp = ArrayList<Chat>()
-            chats.groupBy { chat -> chat.senderAddress }
+            chats.groupBy { chat -> chat.chatPartnerAddress }
                 .values
                 .forEach { uniqueChat -> chatsTemp.add(uniqueChat.sortedBy { it.timestamp }.last()) }
-            val me = chatsTemp.find { it.senderAddress == "02:00:00:00:00:00" }
-            if(me != null) chatsTemp.remove(me)
-            val convo = chatsTemp.map { Conversation(Device(it.senderAddress, it.senderName), it, 0) }
+            val convo = chatsTemp.map { Conversation(Device(it.chatPartnerAddress, it.chatPartnerName), it, 0) }
             convo as ArrayList<Conversation>
         }
     }

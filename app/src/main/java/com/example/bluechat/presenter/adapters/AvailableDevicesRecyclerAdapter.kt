@@ -13,7 +13,7 @@ import com.example.bluechat.domain.models.AvailableDevice
 class AvailableDevicesRecyclerAdapter() : ListAdapter<AvailableDevice, AvailableDevicesRecyclerAdapter.AvailableDevicesViewHolder>(callback){
 
     interface OnItemClickListener{
-        fun onItemClicked(position: Int)
+        fun onItemClicked(address: String, name : String?)
     }
     var itemClickListener : OnItemClickListener? = null
 
@@ -37,7 +37,7 @@ class AvailableDevicesRecyclerAdapter() : ListAdapter<AvailableDevice, Available
         }
 
         view.setOnClickListener{
-            itemClickListener?.onItemClicked(position)
+            itemClickListener?.onItemClicked(device.address, device.name)
         }
     }
 

@@ -26,6 +26,9 @@ import com.example.bluechat.utils.SocketCallback
 import com.example.bluechat.presenter.viewmodels.ChatViewModel
 import com.example.bluechat.presenter.viewmodels.factories.ChatViewModelFactory
 import com.example.bluechat.usecase.ChatActivityUseCase
+import com.example.bluechat.utils.Constants.Companion.INTENT_CHATPARTNER_ADDRESS
+import com.example.bluechat.utils.Constants.Companion.INTENT_CHATPARTNER_NAME
+import com.example.bluechat.utils.Constants.Companion.OWN_ADDRESS
 import kotlinx.android.synthetic.main.activity_chat.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -35,6 +38,8 @@ class ChatActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var binder : MainBluetoothService.MainBluetoothBinder
     lateinit var viewModel : ChatViewModel
+    lateinit var address : String
+    var deviceName : String? = null
 
     val servConn = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -43,19 +48,14 @@ class ChatActivity : AppCompatActivity(), View.OnClickListener {
             val useCase = ChatActivityUseCase(
                 ChatRepository(dataProvider, binder.service)
             )
-            viewModel = ViewModelProvider(this@ChatActivity, ChatViewModelFactory(binder.chatPartner!!.device.address, useCase)).get(ChatViewModel::class.java)
-            viewModel.connectionStateChanged(binder.chatPartner!!.state)
+            viewModel = ViewModelProvider(this@ChatActivity, ChatViewModelFactory(address, useCase)).get(ChatViewModel::class.java)
             viewModel.connectionTitleLiveData.observe(this@ChatActivity, LifecycleObserver {
                 supportActionBar?.subtitle = it
             })
-            binder.socketCallback = object : SocketCallback {
-                override fun onSocketStateChanged(device: BluetoothDevice) {
-                    viewModel.connectionStateChanged(binder.chatPartner!!.state)
-                }
-            }
+
             Handler(Looper.getMainLooper()).post{
-                title = binder.titleOfCurrentPartnerConnection()
-                val adapter = ChatRecyclerAdapter(binder.thisAddress!!, ArrayList<Chat>())
+                title = deviceName?:address
+                val adapter = ChatRecyclerAdapter(OWN_ADDRESS, ArrayList<Chat>())
                 recyclerview_chat_main.adapter = adapter
                 recyclerview_chat_main.layoutManager = LinearLayoutManager(this@ChatActivity, RecyclerView.VERTICAL, true)
                 viewModel.chatsLiveData.observe(this@ChatActivity, LifecycleObserver{
@@ -73,6 +73,10 @@ class ChatActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
         setSupportActionBar(toolbar_chat)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        address = intent.getStringExtra(INTENT_CHATPARTNER_ADDRESS)
+        deviceName = intent.getStringExtra(INTENT_CHATPARTNER_NAME)
 
         imageview_send_chat.setOnClickListener(this)
 
@@ -87,7 +91,7 @@ class ChatActivity : AppCompatActivity(), View.OnClickListener {
                 imageview_send_chat -> {
                     val text = edittext_chat_text.text.toString()
                     edittext_chat_text.setText("")
-                    viewModel.sendMessage(text)
+                    viewModel.sendMessage(text, address, deviceName)
                 }
             }
         }

@@ -7,8 +7,8 @@ import com.example.bluechat.data.BluetoothVisibility
 import com.example.bluechat.domain.models.AvailableDevice
 
 class StartChatRepository(private var interactor: BluetoothInteractor) {
-    fun openChatWithDevice(position : Int,onFinished : (success : Boolean) -> Unit) {
-        interactor.openChatWithDevice(position, onFinished)
+    fun openChatWithDevice(address : String,onFinished : (success : Boolean) -> Unit) {
+        interactor.openChatWithDevice(address, onFinished)
     }
     fun getAvailableDevices() : LiveData<ArrayList<AvailableDevice>>{
         return interactor.getScannedDevices()

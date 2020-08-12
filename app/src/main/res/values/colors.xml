@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#1976d2</color>
+    <color name="colorPrimaryDark">#63a4ff</color>
+    <color name="colorAccent">#fff59d</color>
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="textColorSecondary">#000000</color>
     <color name="chatbubble_text_color">#000000</color>
     <color name="chatbubble_time_color">#7F7F7F</color>
 </resources>

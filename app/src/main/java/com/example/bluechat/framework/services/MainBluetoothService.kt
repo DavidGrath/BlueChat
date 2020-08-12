@@ -27,7 +27,7 @@ import kotlin.collections.ArrayList
 class MainBluetoothService : Service() , BluetoothInteractor{
 
     val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-    var plainHandler : PlainMessageHandler? = null
+    val provider : DataProvider = DataProviderImpl
     val binder = MainBluetoothBinder()
     private var scanState : BluetoothScanState = BluetoothScanState.NotScanning()
     private var _scanStateLiveData = MutableLiveData<BluetoothScanState>(scanState)
@@ -42,22 +42,21 @@ class MainBluetoothService : Service() , BluetoothInteractor{
         return visibilityLiveData
     }
 
-    override fun subscribeForMessages(plainHandler: PlainMessageHandler) {
-        this.plainHandler = plainHandler
+    override fun openChatWithDevice(address: String, onFinished: (success: Boolean) -> Unit) {
+        binder.openChatWithDevice(address, onFinished)
     }
 
-    override fun openChatWithDevice(position: Int, onFinished: (success: Boolean) -> Unit) {
-        binder.openChatWithDevice(position, onFinished)
-    }
-
-    override fun write(bytes : ByteArray) {
-        binder.write(bytes)
+    override fun write(bytes : ByteArray, address : String) {
+        binder.write(bytes, address)
     }
 
     override fun getScannedDevices(): LiveData<ArrayList<AvailableDevice>> {
         return binder.availableDevicesLiveData
     }
 
+    override fun subscribeForConnectionUpdates(address : String, callback : SocketCallback) {
+        binder.subscribe(address, callback)
+    }
     val filter = IntentFilter(BluetoothDevice.ACTION_FOUND).apply {
         addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
         addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
@@ -136,14 +135,15 @@ class MainBluetoothService : Service() , BluetoothInteractor{
 
     inner class MainBluetoothBinder() : Binder() {
 
-        var chatPartner : BluetoothDeviceGeneric? = null
-        private set
-        var socketCallback : SocketCallback? = null
-        set(value) {
-            chatPartner?.socketCallback = value
-            field = value
+        fun subscribe(address : String, callback: SocketCallback) {
+            var device = availableDevices.find { it.device.address == address }
+            device?.let {
+                callback.onSocketStateChanged(it.state)
+                it.socketCallback = callback
+            }
         }
-
+        private var chatPartner : BluetoothDeviceGeneric? = null
+        private set
         val service = this@MainBluetoothService
 
         private var availableDevices = ArrayList<BluetoothDeviceGeneric>()
@@ -152,11 +152,10 @@ class MainBluetoothService : Service() , BluetoothInteractor{
         val availableDevicesLiveData : LiveData<ArrayList<AvailableDevice>> = _availableDevicesLiveData
 
         val bluetoothAdapter : BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-        val thisAddress = bluetoothAdapter?.address
 
         private var handler: MessageHandler = object : MessageHandler{
             override fun onBluetoothMessage(socket: BluetoothSocket, message: String) {
-                plainHandler?.onPlainMessageSent(socket.remoteDevice.address, message)
+                provider.addChat(Chat(message, Date().time, socket.remoteDevice.address, Constants.OWN_ADDRESS, socket.remoteDevice.name))
             }
         }
 
@@ -168,7 +167,7 @@ class MainBluetoothService : Service() , BluetoothInteractor{
                         device,
                         null,
                         handler,
-                        socketCallback
+                        null
                     )
                 )
                 availableDevicesPlain.add(AvailableDevice(device.address, device.name))
@@ -185,18 +184,22 @@ class MainBluetoothService : Service() , BluetoothInteractor{
                     socket.remoteDevice,
                     null,
                     handler,
-                    socketCallback
+                    null
                 )
                 availableDevices.add(device)
             }
             device.setSocketValue(socket)
         }
 
-        fun openChatWithDevice(position : Int, onFinished: (success: Boolean) -> Unit) {
+        fun openChatWithDevice(address : String, onFinished: (success: Boolean) -> Unit) {
             Thread {
-                var device = availableDevices[position]
+                var device = availableDevices.find { it.device.address == address }
                 var succeeded = false
-
+                if(device == null) {
+                    succeeded = false
+                    onFinished.invoke(succeeded)
+                    return@Thread
+                }
                 if(device.socket == null) {
                     val bluetoothSocket = device.device.createRfcommSocketToServiceRecord(RFCOMM_UUID)
                     bluetoothAdapter?.cancelDiscovery()
@@ -216,12 +219,8 @@ class MainBluetoothService : Service() , BluetoothInteractor{
             }.start()
         }
 
-        fun write(bytes: ByteArray) {
-            chatPartner?.sendMessage(bytes)
-        }
-
-        fun titleOfCurrentPartnerConnection(): String {
-            return chatPartner?.device?.name?: "No Name"
+        fun write(bytes: ByteArray, address : String) {
+            availableDevices.find { it.device.address == address }?.sendMessage(bytes)
         }
     }
 }

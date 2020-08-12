@@ -11,6 +11,10 @@ import com.example.bluechat.domain.models.Conversation
 
 class ConversationRecyclerAdapter(private var conversations : ArrayList<Conversation>) : RecyclerView.Adapter<ConversationRecyclerAdapter.ConversationViewHolder>(){
 
+    interface ItemClickListener{
+        fun onItemClicked(address : String, name : String?)
+    }
+    var itemClickListener : ItemClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConversationViewHolder {
         val v = LayoutInflater.from(parent.context).inflate(R.layout.recyclerview_conversation, parent, false)
@@ -25,6 +29,9 @@ class ConversationRecyclerAdapter(private var conversations : ArrayList<Conversa
             conversationLastMessage.text = convo.lastChat.content
             conversationLastMessageTime.text = dateFormat.format(convo.lastChat.timestamp)
             conversationUnreadCount.text = convo.unreadCount.toString()
+            itemView.setOnClickListener{
+                itemClickListener?.onItemClicked(convo.user.address, convo.user.name)
+            }
         }
     }
 

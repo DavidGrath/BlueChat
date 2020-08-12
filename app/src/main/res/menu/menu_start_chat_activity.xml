@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="Scan State" android:id="@+id/menuitem_startchat_scanstate" app:showAsAction="always"/>
-    <item android:title="Visiblity" android:id="@+id/menuitem_startchat_visibility" app:showAsAction="always"/>
+    <item android:title="Start Scan" android:id="@+id/menuitem_startchat_scan" app:showAsAction="always"/>
+    <item android:title="Visiblity" android:id="@+id/menuitem_startchat_visibility" app:showAsAction="always"
+          android:icon="@drawable/ic_visibility_off_black_24dp"/>
 </menu>

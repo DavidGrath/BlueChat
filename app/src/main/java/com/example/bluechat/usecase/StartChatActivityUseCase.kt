@@ -7,8 +7,8 @@ import com.example.bluechat.data.repositories.StartChatRepository
 import com.example.bluechat.domain.models.AvailableDevice
 
 class StartChatActivityUseCase(var repository : StartChatRepository) : UseCase {
-    fun openChatWithDevice(position : Int,onFinished : (success : Boolean) -> Unit) {
-        repository.openChatWithDevice(position, onFinished)
+    fun openChatWithDevice(address : String,onFinished : (success : Boolean) -> Unit) {
+        repository.openChatWithDevice(address, onFinished)
     }
     fun getAvailableDevices() : LiveData<ArrayList<AvailableDevice>> {
         return repository.getAvailableDevices()

@@ -16,7 +16,8 @@
             android:theme="@style/AppTheme">
         <activity android:name="com.example.bluechat.presenter.activities.StartChatActivity">
         </activity>
-        <activity android:name="com.example.bluechat.presenter.activities.ChatActivity">
+        <activity android:name="com.example.bluechat.presenter.activities.ChatActivity"
+        android:parentActivityName=".presenter.activities.MainActivity">
         </activity>
 
         <service
