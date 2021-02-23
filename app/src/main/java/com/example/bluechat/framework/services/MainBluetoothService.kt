@@ -95,6 +95,9 @@ class MainBluetoothService : Service() , BluetoothInteractor{
     override fun onCreate() {
         super.onCreate()
         registerReceiver(receiver, filter)
+        if(!bluetoothAdapter!!.isEnabled) {
+            startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+        }
         startBluetoothServer()
     }
 
